@@ -1,13 +1,13 @@
 [project]
 name = "whatdidyoudo"
 version = "0.1.0"
-description = "A minimal Flask app that prints 'hello world' in the browser."
+description = "A minimal Flask app that shows the amount of OpenStreetMap changes made by a user on a day."
 authors = [
     { name = "Ulf Rompe", email = "whatdidyoudo.rompe.org@rompe.org" }
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 dependencies = [
     "Flask>=3.0.3",
     "flask-caching==2.3.1",
