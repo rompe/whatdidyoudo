@@ -3,13 +3,17 @@ import datetime
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 import requests
+
 from flask import Flask, render_template
 from flask_caching import Cache
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
                            "CACHE_DEFAULT_TIMEOUT": 60 * 60 * 24 * 7})
+limiter = Limiter(app=app, key_func=get_remote_address)
 
 
 def get_etree_from_url(url: str) -> ET.Element:
@@ -67,10 +71,12 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
                 if cached:
                     changes, changesets = cached
                 else:
-                    changes, changesets = get_changes(user, date)
+                    with limiter.limit("10 per minute"):
+                        changes, changesets = get_changes(user, date)
                     cache.set(cache_key, (changes, changesets))  # type: ignore
             else:
-                changes, changesets = get_changes(user, date)
+                with limiter.limit("10 per minute"):
+                    changes, changesets = get_changes(user, date)
         except requests.HTTPError:
             error = f"Can't determine changes for user {user} on {date}."
 
