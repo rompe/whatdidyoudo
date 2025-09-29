@@ -82,3 +82,7 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
 
     return render_template('form.html', user=user, date=date, changes=changes,
                            changesets=changesets, error=error)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

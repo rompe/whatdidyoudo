@@ -43,7 +43,7 @@ get used to it as I think it has a lot of potential.
 3. Run the app in test mode:
 
    ```sh
-   python run_test.py
+   python whatdidyoudo/app.py
    ```
 
    Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser to see "hello world".
