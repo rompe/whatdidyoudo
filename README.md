@@ -48,6 +48,13 @@ get used to it as I think it has a lot of potential.
 
    Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser to see "hello world".
 
+4. Build a package and upload it to Pypi
+
+   ```sh
+   uvx hatchling build
+   uvx twine upload dist/*
+   ```
+
 ## License
 
 This project is licensed under the MIT License. See the `pyproject.toml` for details.
