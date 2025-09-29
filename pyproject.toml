@@ -2,7 +2,10 @@
 name = "whatdidyoudo"
 version = "0.1.0"
 description = "A minimal Flask app that prints 'hello world' in the browser."
-authors = [{name="Ulf Rompe", email="<whatdidyoudo.rompe.org@rompe.org"}]
+authors = [
+    { name = "Ulf Rompe", email = "whatdidyoudo.rompe.org@rompe.org" }
+]
+license = { text = "MIT" }
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
