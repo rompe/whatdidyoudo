@@ -7,7 +7,7 @@ A minimal Flask app that shows the amount of OpenStreetMap changes made by a use
 I often ask myself after contributing many changes to [OpenStreetMap](https://www.openstreetmap.org/),
 either by walking around while extensively using [StreetComplete](https://streetcomplete.app/),
 [MapComplete](https://mapcomplete.org/) or [Vespucci](https://vespucci.io/), or by doing some tasks
-in [iD](https://www.openstreetmap.org/edit) or [jOSM](https://josm.openstreetmap.de/):
+in [iD](https://www.openstreetmap.org/edit) or [JOSM](https://josm.openstreetmap.de/):
 
 ***How many changes did I contribute to the map today?***
 
