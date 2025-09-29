@@ -22,38 +22,38 @@ You don't need to self-host it, it is available for anyone at
 Fun fact: of course you don't really need *uv* for this. I'm just using this project to
 get used to it as I think it has a lot of potential.
 
-1. Install [uv](https://github.com/astral-sh/uv) if needed:
+### Install [uv](https://github.com/astral-sh/uv) if needed
 
-   ```sh
-   pip install uv
-   ```
+```sh
+pip install uv
+```
 
-2. Install dependencies using *uv*:
+### Install dependencies using *uv*
 
-   ```sh
-   uv pip install -r pyproject.toml
-   ```
+```sh
+uv pip install -r pyproject.toml
+```
 
-   If you want to develop:
+If you want to develop:
 
-   ```sh
-   uv pip install -r pyproject.toml --extra dev
-   ```
+```sh
+uv pip install -r pyproject.toml --extra dev
+```
 
-3. Run the app in test mode:
+### Run the app in test mode
 
-   ```sh
-   python whatdidyoudo/app.py
-   ```
+```sh
+python whatdidyoudo/app.py
+```
 
-   Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser to see "hello world".
+Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser to see "hello world".
 
-4. Build a package and upload it to Pypi
+### Build a package and upload it to Pypi
 
-   ```sh
-   uvx hatchling build
-   uvx twine upload dist/*
-   ```
+```sh
+uvx hatchling build
+uvx twine upload dist/*
+```
 
 ## License
 
