@@ -4,8 +4,12 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 import requests
 from flask import Flask, render_template
+from flask_caching import Cache
+
 
 app = Flask(__name__)
+cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
+                           "CACHE_DEFAULT_TIMEOUT": 60 * 60 * 24 * 7})
 
 
 def get_etree_from_url(url: str) -> ET.Element:
@@ -56,7 +60,17 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
     error = ""
     if user and date:
         try:
-            changes, changesets = get_changes(user, date)
+            today = datetime.date.today().isoformat()
+            if date != today:
+                cache_key = f"changes_{user}_{date}"
+                cached = cache.get(cache_key)  # type: ignore
+                if cached:
+                    changes, changesets = cached
+                else:
+                    changes, changesets = get_changes(user, date)
+                    cache.set(cache_key, (changes, changesets))  # type: ignore
+            else:
+                changes, changesets = get_changes(user, date)
         except requests.HTTPError:
             error = f"Can't determine changes for user {user} on {date}."
 
