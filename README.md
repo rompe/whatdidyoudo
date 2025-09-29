@@ -40,6 +40,12 @@ If you want to develop:
 uv pip install -r pyproject.toml --extra dev
 ```
 
+### Run tests
+
+```sh
+pytest
+```
+
 ### Run the app in test mode
 
 ```sh
