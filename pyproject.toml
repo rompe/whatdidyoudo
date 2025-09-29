@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "whatdidyoudo"
-version = "0.1.0"
+version = "0.1.1"
 description = "A minimal Flask app that shows the amount of OpenStreetMap changes made by a user on a day."
 authors = [
     { name = "Ulf Rompe", email = "whatdidyoudo.rompe.org@rompe.org" }
@@ -25,6 +25,11 @@ dev = [
     "hatchling>=1.27.0",
     "twine>=6.2.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/rompe/whatdidyoudo"
+Issues = "https://github.com/rompe/whatdidyoudo/issues"
+
 
 [tool.uv]
 # uv-specific settings go here
