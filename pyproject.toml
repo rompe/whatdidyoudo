@@ -1,0 +1,24 @@
+[project]
+name = "whatdidyoudo"
+version = "0.1.0"
+description = "A minimal Flask app that prints 'hello world' in the browser."
+authors = [{name="Ulf Rompe", email="<whatdidyoudo.rompe.org@rompe.org"}]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "Flask>=3.0.3",
+    "requests>=2.32.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "Ruff>=0.13.2",
+    "types-requests>=2.32.4",
+]
+
+[tool.uv]
+# uv-specific settings go here
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

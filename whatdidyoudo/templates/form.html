@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>What Did You Do?</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+    window.onload = function() {
+        var dateInput = document.getElementById('date');
+        if (!dateInput.value) {
+            var today = new Date();
+            var yyyy = today.getFullYear();
+            var mm = String(today.getMonth() + 1).padStart(2, '0');
+            var dd = String(today.getDate()).padStart(2, '0');
+            dateInput.value = yyyy + '-' + mm + '-' + dd;
+        }
+    };
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2><a href="/">What Did You Do?</a></h2>
+        <form method="get" action="" onsubmit="event.preventDefault(); window.location.href='/' + encodeURIComponent(document.getElementById('user').value) + '/' + encodeURIComponent(document.getElementById('date').value);">
+            <label for="user">User:</label>
+            <input type="text" id="user" name="user" value="{{ user or '' }}" placeholder="insert OSM username" required>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date" value="{{ date or '' }}" required>
+
+            <button type="submit">Show</button>
+        </form>
+    </div>
+    {% if user and date %}
+        {% if error %}
+            <p class=error>{{ error }}</p>
+        {% elif changes %}
+            <p>{{ user }} did some changes on {{ date }}!</p>
+            {% for app, count in changes.items() %}
+            <ul>
+            <li>{{ count }} changes in {{ app }}</li>
+            </ul>
+            {% endfor %}
+            That's a total of {{ changesets }} changesets.
+        {% else %}
+            <p>{{ user }} did not do anything on {{ date }}.</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
