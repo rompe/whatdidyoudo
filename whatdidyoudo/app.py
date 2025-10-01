@@ -84,5 +84,10 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
                            changesets=changesets, error=error)
 
 
-if __name__ == "__main__":
+def main():
+    """Run in debug mode."""
     app.run(debug=True)
+
+
+if __name__ == "__main__":
+    main()

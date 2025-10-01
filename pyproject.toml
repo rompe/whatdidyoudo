@@ -2,9 +2,12 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+packages = ["whatdidyoudo"]
+
 [project]
 name = "whatdidyoudo"
-version = "0.1.1"
+version = "0.1.5"
 description = "A minimal Flask app that shows the amount of OpenStreetMap changes made by a user on a day."
 authors = [
     { name = "Ulf Rompe", email = "whatdidyoudo.rompe.org@rompe.org" }
@@ -15,6 +18,7 @@ requires-python = ">=3.11"
 dependencies = [
     "Flask>=3.0.3",
     "flask-caching==2.3.1",
+    "flask-limiter>=4.0.0",
     "requests>=2.32.4",
 ]
 
