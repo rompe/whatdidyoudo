@@ -9,6 +9,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+__version__ = "0.1.8"
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
@@ -81,7 +82,7 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
             error = f"Can't determine changes for user {user} on {date}."
 
     return render_template('form.html', user=user, date=date, changes=changes,
-                           changesets=changesets, error=error)
+                           changesets=changesets, error=error, version=__version__)
 
 
 def main():
