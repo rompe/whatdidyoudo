@@ -43,7 +43,14 @@
         {% else %}
             <p>{{ user }} did not do anything on {{ date }}.</p>
         {% endif %}
+    {% else %}
+        <p>
+            How much did you contribute to OpenStreetMap today? Or any other day?
+
+            To answer this question, enter your OSM username and the date you want to check above and click "Show".
+        </p>
     {% endif %}
+    <p class="footer">Powered by <a href="https://github.com/rompe/whatdidyoudo">whatdidyoudo {{ config['VERSION'] }}</a></p>
     </div>
 </body>
 </html>

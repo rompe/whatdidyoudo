@@ -88,6 +88,15 @@ h2 a {
     letter-spacing: 1px;
 }
 
+.footer {
+    text-align: center;
+    font-size: 0.85em;
+    color: #b0b0b0;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    letter-spacing: 0.5px;
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 1em 0.5em;
