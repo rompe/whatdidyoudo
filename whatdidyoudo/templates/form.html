@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>What Did You Do?</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script>
@@ -35,11 +36,11 @@
             <p class=error>{{ error }}</p>
         {% elif changes %}
             <p>{{ user }} did some changes on {{ date }}!</p>
-            {% for app, count in changes.items() %}
             <ul>
-            <li>{{ count }} changes in {{ app }}</li>
-            </ul>
+            {% for app, count in changes.items() %}
+                <li>{{ count }} changes in {{ app }}</li>
             {% endfor %}
+            </ul>
             That's a total of {{ changesets }} changesets.
         {% else %}
             <p>{{ user }} did not do anything on {{ date }}.</p>

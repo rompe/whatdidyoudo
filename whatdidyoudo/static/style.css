@@ -41,38 +41,39 @@ label {
     display: none;
 }
 
+input[type="text"],
+input[type="date"],
+button {
+    border: none;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 1.1em;
+    font-weight: 600;
+    /* min-height: 3em; */
+    outline: none;
+}
+
 input[type="text"] {
     flex: 2 1 200px;
     padding: 0.7em 1em;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.1em;
     background: #2c2f34;
     color: #f3f3f3;
-    outline: none;
 }
 
 input[type="date"] {
     flex: 1 1 120px;
     padding: 0.7em 0.5em;
-    border-radius: 8px;
-    border: none;
-    font-size: 1.1em;
     background: #2c2f34;
     color: #f3f3f3;
-    outline: none;
     min-width: 120px;
     max-width: 160px;
 }
 
 button {
     padding: 0.7em 1.5em;
-    border-radius: 8px;
-    border: none;
     background: #4f8cff;
     color: #fff;
-    font-size: 1.1em;
-    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
 }
