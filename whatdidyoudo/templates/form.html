@@ -35,13 +35,12 @@
         {% if error %}
             <p class=error>{{ error }}</p>
         {% elif changes %}
-            <p>{{ user }} did some changes on {{ date }}!</p>
+            <p>{{ user }} did {{ changes.values() | sum }} changes in {{ changesets }} changeset{{ "s" if changesets > 1 else ""  }} on {{ date }}!</p>
             <ul>
             {% for app, count in changes.items() %}
                 <li>{{ count }} changes in {{ app }}</li>
             {% endfor %}
             </ul>
-            That's a total of {{ changesets }} changesets.
         {% else %}
             <p>{{ user }} did not do anything on {{ date }}.</p>
         {% endif %}
