@@ -30,7 +30,6 @@
 
             <button type="submit">Show</button>
         </form>
-    </div>
     {% if user and date %}
         {% if error %}
             <p class=error>{{ error }}</p>
@@ -45,5 +44,6 @@
             <p>{{ user }} did not do anything on {{ date }}.</p>
         {% endif %}
     {% endif %}
+    </div>
 </body>
 </html>
