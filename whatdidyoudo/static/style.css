@@ -96,6 +96,12 @@ a:hover {
     text-decoration: underline;
 }
 
+.disclaimer {
+    font-size: 0.9em;
+    color: #777;
+    margin-top: 1.5em;
+}
+
 .footer {
     text-align: center;
     font-size: 0.85em;
