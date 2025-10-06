@@ -34,14 +34,14 @@
         {% if error %}
             <p class=error>{{ error }}</p>
         {% elif changes %}
-            <p>{{ user }} did {{ changes.values() | sum }} changes in {{ changesets }} changeset{{ "s" if changesets > 1 else ""  }} on {{ date }}!</p>
+            <p><a href="https://www.openstreetmap.org/user/{{ user }}">{{ user }}</a> did {{ changes.values() | sum }} changes in {{ changesets }} changeset{{ "s" if changesets > 1 else ""  }} on {{ date }}:</p>
             <ul>
             {% for app, count in changes.items() %}
                 <li>{{ count }} changes in {{ app }}</li>
             {% endfor %}
             </ul>
         {% else %}
-            <p>{{ user }} did not do anything on {{ date }}.</p>
+            <p><a href="https://www.openstreetmap.org/user/{{ user }}">{{ user }}</a> did not do anything on {{ date }}.</p>
         {% endif %}
     {% else %}
         <p>

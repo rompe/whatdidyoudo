@@ -87,6 +87,14 @@ h2 a {
     font-weight: 700;
     letter-spacing: 1px;
 }
+p a {
+    color: #4f8cff;
+    text-decoration: none;
+}
+a:hover {
+    color: #2563eb;
+    text-decoration: underline;
+}
 
 .footer {
     text-align: center;
