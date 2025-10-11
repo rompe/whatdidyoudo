@@ -31,9 +31,10 @@
             <button type="submit">Show</button>
         </form>
     {% if user and date %}
-        {% if error %}
+        {% for error in errors %}
             <p class=error>{{ error }}</p>
-        {% elif changes %}
+        {% endfor %}
+        {% if changes %}
             <p><a href="https://www.openstreetmap.org/user/{{ user }}">{{ user }}</a> did {{ changes.values() | sum }} changes in {{ changesets }} changeset{{ "s" if changesets > 1 else ""  }} on {{ date }}:</p>
             <ul>
             {% for app, count in changes.items() %}

@@ -9,7 +9,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-__version__ = "0.1.10"
+__version__ = "0.1.11"
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
@@ -63,29 +63,27 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
     """shows OSM tasks done by a user on a specific day."""
     changes: defaultdict[str, int] = defaultdict(int)
     changesets = 0
-    error = ""
+    errors: list[str] = []
     if user:
         today = datetime.date.today().isoformat()
         if not date:
             date = today
-        try:
-            if date != today:
-                cache_key = f"changes_{user}_{date}"
-                cached = cache.get(cache_key)  # type: ignore
-                if cached:
-                    changes, changesets = cached
-                else:
-                    with limiter.limit("10 per minute"):
-                        changes, changesets = get_changes(user, date)
-                    cache.set(cache_key, (changes, changesets))  # type: ignore
-            else:
+        cache_key = f"changes_{user}_{date}"
+        cached = cache.get(cache_key)  # type: ignore
+        if cached:
+            changes, changesets = cached
+        else:
+            try:
                 with limiter.limit("10 per minute"):
                     changes, changesets = get_changes(user, date)
-        except requests.HTTPError:
-            error = f"Can't determine changes for user {user} on {date}."
+            except requests.HTTPError:
+                errors.append(
+                    f"Can't determine changes for user {user} on {date}.")
+            if date != today:
+                cache.set(cache_key, (changes, changesets))  # type: ignore
 
     return render_template('form.html', user=user, date=date, changes=changes,
-                           changesets=changesets, error=error,
+                           changesets=changesets, errors=errors,
                            version=__version__)
 
 
