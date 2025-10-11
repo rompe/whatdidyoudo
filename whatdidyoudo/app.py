@@ -2,6 +2,7 @@
 import datetime
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from dataclasses import dataclass
 import requests
 
 from flask import Flask, render_template
@@ -17,6 +18,13 @@ cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
 limiter = Limiter(app=app, key_func=get_remote_address)
 
 
+@dataclass
+class Changes:
+    """Represent changes made by a user."""
+    changes: int = 0
+    changesets: int = 0
+
+
 def get_etree_from_url(url: str) -> ET.Element:
     """Fetches XML content from a URL and returns the root Element."""
     response = requests.get(url, timeout=120)
@@ -24,10 +32,10 @@ def get_etree_from_url(url: str) -> ET.Element:
     return ET.fromstring(response.content)
 
 
-def get_changes(user: str, date: str):
-    """Return a {app: num of changes} dictionary and the changesets amount."""
-    changes: defaultdict[str, int] = defaultdict(int)
-    changesets = 0
+def get_changes(user: str, date: str) -> defaultdict[str, Changes]:
+    """Return a {app: Changes} dictionary."""
+    # {user: {app: Changes}}
+    changes: defaultdict[str, Changes] = defaultdict(Changes)
     datetime_date = datetime.date.fromisoformat(date)
     start_time = f"{datetime_date}T00:00:00Z"
     end_time = f"{datetime_date + datetime.timedelta(days=1)}T00:00:00Z"
@@ -41,7 +49,7 @@ def get_changes(user: str, date: str):
 
         tags = {tag.attrib["k"]: tag.attrib["v"] for tag in cs.findall("tag")}
         editor = tags.get("created_by", "")
-        changesets += 1
+        changes[editor].changesets += 1
 
         diff_url = ("https://api.openstreetmap.org/api/0.6/changeset/"
                     f"{cs_id}/download")
@@ -51,8 +59,8 @@ def get_changes(user: str, date: str):
             continue
 
         for action in root:
-            changes[editor] += len(action)
-    return changes, changesets
+            changes[editor].changes += len(action)
+    return changes
 
 
 @app.route('/')
@@ -61,26 +69,28 @@ def get_changes(user: str, date: str):
 @app.route('/<user>/<date>')
 def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
     """shows OSM tasks done by a user on a specific day."""
-    changes: defaultdict[str, int] = defaultdict(int)
-    changesets = 0
+    changes: defaultdict[str, defaultdict[str, Changes]] = \
+        defaultdict(lambda: defaultdict(Changes))
+    changesets: dict[str, int] = {}
     errors: list[str] = []
-    if user:
-        today = datetime.date.today().isoformat()
-        if not date:
-            date = today
-        cache_key = f"changes_{user}_{date}"
-        cached = cache.get(cache_key)  # type: ignore
-        if cached:
-            changes, changesets = cached
-        else:
+    today = datetime.date.today().isoformat()
+    if not date:
+        date = today
+    for name in [item.strip() for item in (user or "").split(",")
+                 if item.strip()]:
+        cache_key = f"changes_{name}_{date}"
+        cur_changes = cache.get(cache_key)  # type: ignore
+        if not cur_changes:
             try:
                 with limiter.limit("10 per minute"):
-                    changes, changesets = get_changes(user, date)
+                    cur_changes = get_changes(name, date)
+                if date != today:
+                    cache.set(cache_key, cur_changes)  # type: ignore
             except requests.HTTPError:
                 errors.append(
-                    f"Can't determine changes for user {user} on {date}.")
-            if date != today:
-                cache.set(cache_key, (changes, changesets))  # type: ignore
+                    f"Can't determine changes for user {name} on {date}.")
+        if cur_changes:
+            changes[name] = cur_changes
 
     return render_template('form.html', user=user, date=date, changes=changes,
                            changesets=changesets, errors=errors,
