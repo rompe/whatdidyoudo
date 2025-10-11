@@ -56,6 +56,7 @@ def get_changes(user: str, date: str):
 
 
 @app.route('/')
+@app.route('/<user>/')
 @app.route('/<user>')
 @app.route('/<user>/<date>')
 def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
@@ -63,9 +64,11 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
     changes: defaultdict[str, int] = defaultdict(int)
     changesets = 0
     error = ""
-    if user and date:
+    if user:
+        today = datetime.date.today().isoformat()
+        if not date:
+            date = today
         try:
-            today = datetime.date.today().isoformat()
             if date != today:
                 cache_key = f"changes_{user}_{date}"
                 cached = cache.get(cache_key)  # type: ignore

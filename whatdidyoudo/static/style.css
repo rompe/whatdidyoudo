@@ -96,6 +96,11 @@ a:hover {
     text-decoration: underline;
 }
 
+.note {
+    font-size: 0.9em;
+    color: #aaa;
+    margin-top: 1.5em;
+}
 .disclaimer {
     font-size: 0.9em;
     color: #777;
