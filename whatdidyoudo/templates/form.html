@@ -64,19 +64,28 @@
             <h4>Tips</h4>
             <ul>
                 <li>Do you want to have a bookmark that always shows your numbers for the current day?
-                    Just use <code>/YOUR_USERNAME</code> as URL and omit the date!</li>
+                    Just use <code>/YOUR_USERNAME</code> as URL and omit the date!
+                </li>
                 <li>You can enter multiple usernames separated by commas to see their contributions at once.
-                    Try this after a mapwalk with friends!</li>
+                    Try this after a mapwalk with friends!
+                </li>
             </ul>
         </div>
         <div class="disclaimer">
             <h4>Disclaimers</h4>
             <ul>
-                <li>This is a very simple service. It does exactly one job and tries to do it good.</li>
                 <li>Quality beats quantity. While it's nice to see big numbers here, please remember
-                    that just one high-effort change will help more that any amount of mediocre changes.</li>
+                    that just one high-effort change will help more that any amount of mediocre changes.
+                </li>
                 <li>This service is rate-limited to 10 OSM API requests per minute and caches results
-                     for 1 hour to reduce load on the API.</li>
+                    for 1 hour (except for the current day) to reduce load on the API.
+                    Too restrictive? Tell me!
+                </li>
+                <li>This is a very simple service. It does exactly one job and tries to do it good.
+                    The data displayed here is shown by many other services, but I didn't find one
+                    that answers my question in this way with just a simple bookmark.
+                    Suggestions are welcome! Get in touch via the issue tracker on the project page.
+                </li>
             </ul>
         </div>
     {% endif %}
