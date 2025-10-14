@@ -10,7 +10,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter, RateLimitExceeded
 from flask_limiter.util import get_remote_address
 
-__version__ = "0.1.14"
+__version__ = "0.2.0"
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
@@ -32,10 +32,10 @@ def get_etree_from_url(url: str) -> ET.Element:
     return ET.fromstring(response.content)
 
 
-def get_changes(user: str, date: str) -> defaultdict[str, Changes]:
-    """Return a {app: Changes} dictionary."""
-    # {user: {app: Changes}}
+def get_changes(user: str, date: str):
+    """Return a ({app: Changes} dictionary, [changeset_ids]) tuple."""
     changes: defaultdict[str, Changes] = defaultdict(Changes)
+    changeset_ids: list[str] = []
     datetime_date = datetime.date.fromisoformat(date)
     start_time = f"{datetime_date}T00:00:00Z"
     end_time = f"{datetime_date + datetime.timedelta(days=1)}T00:00:00Z"
@@ -46,6 +46,7 @@ def get_changes(user: str, date: str) -> defaultdict[str, Changes]:
 
     for cs in root.findall("changeset"):
         cs_id = cs.attrib["id"]
+        changeset_ids.append(cs_id)
 
         tags = {tag.attrib["k"]: tag.attrib["v"] for tag in cs.findall("tag")}
         editor = tags.get("created_by", "")
@@ -60,7 +61,7 @@ def get_changes(user: str, date: str) -> defaultdict[str, Changes]:
 
         for action in root:
             changes[editor].changes += len(action)
-    return changes
+    return changes, changeset_ids
 
 
 @app.route('/')
@@ -76,28 +77,32 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
     today = datetime.date.today().isoformat()
     if not date:
         date = today
+
+    changeset_ids: list[str] = []
     for name in [item.strip() for item in (user or "").split(",")
                  if item.strip()]:
         cache_key = f"changes_{name}_{date}"
-        cur_changes = cache.get(cache_key)  # type: ignore
-        if not cur_changes:
+        cur_data = cache.get(cache_key)  # type: ignore
+        if not cur_data:
             try:
                 with limiter.limit("10 per minute"):
-                    cur_changes = get_changes(name, date)
+                    cur_data = get_changes(name, date)
                 if date != today:
-                    cache.set(cache_key, cur_changes)  # type: ignore
+                    cache.set(cache_key, cur_data)  # type: ignore
             except requests.HTTPError:
                 errors.append(
                     f"Can't determine changes for user {name} on {date}.")
             except RateLimitExceeded as msg:
                 errors.append("Rate limit exceeded while processing user "
                               f"{name}: {msg}")
-        if cur_changes:
+        if cur_data:
+            cur_changes, cur_ids = cur_data
             changes[name] = cur_changes
+            changeset_ids.extend(cur_ids)
 
     return render_template('form.html', user=user, date=date, changes=changes,
                            changesets=changesets, errors=errors,
-                           version=__version__)
+                           version=__version__, changeset_ids=changeset_ids)
 
 
 def main():
