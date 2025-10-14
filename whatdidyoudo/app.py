@@ -7,10 +7,10 @@ import requests
 
 from flask import Flask, render_template
 from flask_caching import Cache
-from flask_limiter import Limiter
+from flask_limiter import Limiter, RateLimitExceeded
 from flask_limiter.util import get_remote_address
 
-__version__ = "0.1.13"
+__version__ = "0.1.14"
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
@@ -89,6 +89,9 @@ def whatdidyoudo(user: str | None = None, date: str | None = None) -> str:
             except requests.HTTPError:
                 errors.append(
                     f"Can't determine changes for user {name} on {date}.")
+            except RateLimitExceeded as msg:
+                errors.append("Rate limit exceeded while processing user "
+                              f"{name}: {msg}")
         if cur_changes:
             changes[name] = cur_changes
 
