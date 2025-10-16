@@ -10,7 +10,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter, RateLimitExceeded
 from flask_limiter.util import get_remote_address
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 app = Flask(__name__)
 cache = Cache(app, config={"CACHE_TYPE": "SimpleCache",
