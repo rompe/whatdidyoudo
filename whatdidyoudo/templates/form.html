@@ -42,7 +42,7 @@
                 {% set ns.changesets = ns.changesets + Change.changesets %}
             {% endfor %}
             <ul>
-            <p><a href="https://www.openstreetmap.org/user/{{ user }}">{{ name }}</a>
+            <p><a href="https://www.openstreetmap.org/user/{{ name }}">{{ name }}</a>
                  did {{ ns.changes }} change{{ "s" if ns.changes > 1 else ""  }}
                  in {{ ns.changesets }} changeset{{ "s" if ns.changesets > 1 else ""  }}
                  on {{ date }}:</p>
