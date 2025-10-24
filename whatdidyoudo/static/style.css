@@ -16,7 +16,7 @@ body {
     box-shadow: 0 4px 24px rgba(0,0,0,0.3);
     padding: 2em 2.5em 1.5em 2.5em;
     margin-top: 2em;
-    max-width: 600px;
+    max-width: 800px;
     width: 95%;
 }
 
@@ -37,12 +37,61 @@ form {
     width: 100%;
 }
 
-label {
+.expert-toggle {
+    display: flex;
+    align-items: center; /* vertically center checkbox and label within the form's row */
+    margin-top: 0.5em;
+}
+
+@media (max-width: 600px) {
+    .expert-toggle {
+        margin-top: 0; /* in stacked layout keep normal spacing */
+    }
+}
+
+/* Expert rows: align labels and inputs into two columns so inputs stack vertically
+   and are perfectly aligned regardless of label width. */
+.expert-row {
+    /* allow the element to not introduce its own box so its children
+       participate in the parent's grid; keeps markup simple while
+       allowing a single shared grid column sizing for labels */
+    display: contents;
+}
+
+#expertControls {
+    display: grid;
+    grid-template-columns: auto 1fr; /* dynamic label column, flexible input column */
+    gap: 0.5em 1em;
+    align-items: center;
+}
+
+#expertControls label {
+    justify-self: end; /* right-align labels to create a neat gutter */
+}
+
+#expertControls input[type="datetime-local"] {
+    width: 100%;
+    min-width: 0; /* allow the input to shrink inside grid */
+}
+
+/* On small screens, stack label above input for readability */
+@media (max-width: 600px) {
+    #expertControls {
+        grid-template-columns: 1fr; /* single column: label above input */
+    }
+    #expertControls label {
+        justify-self: start;
+    }
+}
+
+label.hidden {
     display: none;
 }
 
 input[type="text"],
 input[type="date"],
+input[type="datetime-local"],
+input[type="checkbox"],
 button {
     border: none;
     border-radius: 8px;
@@ -61,14 +110,24 @@ input[type="text"] {
     color: #f3f3f3;
 }
 
+input[type="datetime-local"],
 input[type="date"] {
     /* flex: 1 1 120px; */
     padding: 0.7em 0.5em;
     background: #2c2f34;
     color: #f3f3f3;
+}
+
+input[type="date"] {
     min-width: 120px;
     max-width: 160px;
 }
+
+input[type="datetime-local"] {
+    min-width: 120px;
+    max-width: 260px;
+}
+
 
 button {
     padding: 0.7em 1.5em;
@@ -124,7 +183,8 @@ a:hover {
         flex-direction: column;
         gap: 0.7em;
     }
-    input[type="date"] {
+    input[type="date"],
+    input[type="datetime-local"] {
         width: 100%;
         min-width: unset;
         max-width: unset;

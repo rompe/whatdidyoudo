@@ -7,31 +7,110 @@
     <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script>
-    window.onload = function() {
-        var dateInput = document.getElementById('date');
-        if (!dateInput.value) {
-            var today = new Date();
-            var yyyy = today.getFullYear();
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var dd = String(today.getDate()).padStart(2, '0');
-            dateInput.value = yyyy + '-' + mm + '-' + dd;
+    function isoToday() {
+        const t = new Date();
+        const yyyy = t.getFullYear();
+        const mm = String(t.getMonth() + 1).padStart(2, '0');
+        const dd = String(t.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function initForm() {
+        const expert = document.getElementById('expert');
+        const expertControls = document.getElementById('expertControls');
+        const simpleRow = document.getElementById('simpleDateRow');
+
+    // Initialize dates/time defaults
+    const single = document.getElementById('single_date');
+    const start_dt = document.getElementById('start_dt');
+    const end_dt = document.getElementById('end_dt');
+
+    if (single && !single.value) single.value = isoToday();
+    // default datetime-local values: YYYY-MM-DDTHH:MM
+    if (start_dt && !start_dt.value) start_dt.value = (single ? single.value : isoToday()) + 'T00:00';
+    if (end_dt && !end_dt.value) end_dt.value = (single ? single.value : isoToday()) + 'T23:59';
+
+        // If server rendered the expert checkbox checked, reflect that in UI
+        if (expert.checked) {
+            expertControls.style.display = '';
+            simpleRow.style.display = 'none';
         }
-    };
+
+        expert.addEventListener('change', function() {
+            if (expert.checked) {
+                expertControls.style.display = '';
+                simpleRow.style.display = 'none';
+                // copy single date into start/end if empty
+                if (start_dt && !start_dt.value) start_dt.value = (single ? single.value : isoToday()) + 'T00:00';
+                if (end_dt && !end_dt.value) end_dt.value = (single ? single.value : isoToday()) + 'T23:59';
+            } else {
+                expertControls.style.display = 'none';
+                simpleRow.style.display = '';
+            }
+        });
+    }
+
+    function submitForm() {
+        const user = encodeURIComponent(document.getElementById('user').value);
+        const expert = document.getElementById('expert').checked;
+        if (!expert) {
+            const date = encodeURIComponent(document.getElementById('single_date').value);
+            // keep URL as /user/date
+            window.location.href = '/' + user + '/' + date;
+            return;
+        }
+        // expert mode: use datetime-local inputs. We will split them into date and time
+        const sd_raw = document.getElementById('start_dt').value; // YYYY-MM-DDTHH:MM
+        const ed_raw = document.getElementById('end_dt').value || sd_raw;
+        if (!sd_raw) {
+            alert('Please provide a start date/time.');
+            return;
+        }
+        const [sd_date, sd_time] = sd_raw.split('T');
+        const [ed_date, ed_time] = ed_raw.split('T');
+        const qs = `?expert=1&start_time=${encodeURIComponent(sd_time)}&end_time=${encodeURIComponent(ed_time)}`;
+        window.location.href = '/' + user + '/' + encodeURIComponent(sd_date) + '/' + encodeURIComponent(ed_date) + qs;
+    }
+
+    window.addEventListener('DOMContentLoaded', initForm);
     </script>
 </head>
 <body>
     <div class="container">
         <h2><a href="/">What Did You Do?</a></h2>
-        <form method="get" action="" onsubmit="event.preventDefault(); window.location.href='/' + encodeURIComponent(document.getElementById('user').value) + '/' + encodeURIComponent(document.getElementById('date').value);">
-            <label for="user">User:</label>
+        <form id="mainForm" method="get" action="" onsubmit="event.preventDefault(); submitForm();">
+            <label for="user" class="hidden">User:</label>
             <input type="text" id="user" name="user" value="{{ user or '' }}" placeholder="insert OSM username" required>
 
-            <label for="date">Date:</label>
-            <input type="date" id="date" name="date" value="{{ date or '' }}" required>
+            <!-- Simple date (default) -->
+            <div id="simpleDateRow">
+                <label for="single_date" class="hidden">Date:</label>
+                <input type="date" id="single_date" name="single_date" value="{{ start_date or '' }}">
+            </div>
+
+            <!-- Expert controls (hidden by default) -->
+            <div id="expertControls" style="display: none; margin-top: 0.5em;">
+                <div class="expert-row">
+                    <label for="start_dt">Start:</label>
+                    <input type="datetime-local" id="start_dt" name="start_dt"
+                     value="{{ (start_date ~ 'T' ~ start_time) if start_date else '' }}">
+                </div>
+                <div class="expert-row">
+                    <label for="end_dt">End:</label>
+                    <input type="datetime-local" id="end_dt" name="end_dt"
+                     value="{{ ((end_date or start_date) ~ 'T' ~ (end_time or '23:59')) if (end_date or start_date) else '' }}">
+                </div>
+            </div>
+
+            <div class="expert-toggle">
+                <input type="checkbox" id="expert" name="expert"
+                 value="1" {{ 'checked' if expert else '' }}>
+                <label for="expert">Expert mode</label>
+            </div>
 
             <button type="submit">Show</button>
         </form>
-    {% if user and date %}
+    {% if user %}
         {% for error in errors %}
             <p class=error>{{ error }}</p>
         {% endfor %}
@@ -42,10 +121,10 @@
                 {% set ns.changesets = ns.changesets + Change.changesets %}
             {% endfor %}
             <ul>
-            <p><a href="https://www.openstreetmap.org/user/{{ name }}">{{ name }}</a>
-                 did {{ ns.changes }} change{{ "s" if ns.changes > 1 else ""  }}
+            <p><b><a href="https://www.openstreetmap.org/user/{{ name }}">{{ name }}</a></b>
+                 did <b>{{ ns.changes }} change{{ "s" if ns.changes > 1 else ""  }}</b>
                  in {{ ns.changesets }} changeset{{ "s" if ns.changesets > 1 else ""  }}
-                 on {{ date }}:</p>
+                 {{ date_str }}:</p>
             {% for app, Change in apps.items() %}
                 <li>{{ Change.changes }} change{{ "s" if Change.changes > 1 else ""  }} in
                     {{ Change.changesets }} changeset{{ "s" if Change.changesets > 1 else ""  }}
