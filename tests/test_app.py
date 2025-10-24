@@ -19,7 +19,7 @@ class WhatDidYouDoTestCase(unittest.TestCase):
         response = self.app.get('/')
         html = response.get_data(as_text=True)
         self.assertIn('name="user"', html)
-        self.assertIn('name="date"', html)
+        self.assertIn('name="single_date"', html)
 
     def test_user_date_route(self):
         """Test that the user/date route returns a 200 status code."""
