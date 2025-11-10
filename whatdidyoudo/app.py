@@ -82,7 +82,8 @@ def get_changes(user: str, start_date: str, end_date: str | None = None,
 @app.route('/<user>/<start_date>/<end_date>')
 def whatdidyoudo(user: str | None = None, start_date: str | None = None,
                  end_date: str | None = None) -> str:
-    """shows OSM tasks done by a user within a date/time range.
+    """
+    Show OSM tasks done by a user within a date/time range.
 
     Expert mode allows finer-grained start/end times via query params:
     expert=1, start_time=HH:MM, end_time=HH:MM
@@ -96,9 +97,9 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
     start_time = request.args.get('start_time', '00:00')
     end_time = request.args.get('end_time', '23:59')
 
-    date_str = (f"between {start_date} {start_time} and {end_date} {end_time}"
-                if end_date or expert else f"on {start_date}")
     today = datetime.date.today().isoformat()
+    date_str = (f"between {start_date} {start_time} and {end_date} {end_time}"
+                if end_date or expert else f"on {start_date or today}")
 
     changeset_ids: list[str] = []
     for name in [item.strip() for item in (user or "").split(",")
