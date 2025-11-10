@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 packages = ["whatdidyoudo"]
 [tool.hatch.version]
 source = "code"
-path = "whatdidyoudo/app.py"
+path = "whatdidyoudo/__init__.py"
 
 [project]
 name = "whatdidyoudo"
