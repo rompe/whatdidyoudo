@@ -68,8 +68,7 @@
         }
         const [sd_date, sd_time] = sd_raw.split('T');
         const [ed_date, ed_time] = ed_raw.split('T');
-        const qs = `?expert=1&start_time=${encodeURIComponent(sd_time)}&end_time=${encodeURIComponent(ed_time)}`;
-        window.location.href = '/' + user + '/' + encodeURIComponent(sd_date) + '/' + encodeURIComponent(ed_date) + qs;
+        window.location.href = '/' + user + '/' + encodeURIComponent(sd_raw) + '/' + encodeURIComponent(ed_raw);
     }
 
     window.addEventListener('DOMContentLoaded', initForm);
@@ -78,6 +77,7 @@
 <body>
     <div class="container">
         <h2><a href="/">What Did You Do?</a></h2>
+        {% block fullcontent %}
         <form id="mainForm" method="get" action="" onsubmit="event.preventDefault(); submitForm();">
             <label for="user" class="hidden">User:</label>
             <input type="text" id="user" name="user" value="{{ user or '' }}" placeholder="insert OSM username" required>
@@ -93,12 +93,12 @@
                 <div class="expert-row">
                     <label for="start_dt">Start:</label>
                     <input type="datetime-local" id="start_dt" name="start_dt"
-                     value="{{ (start_date ~ 'T' ~ start_time) if start_date else '' }}">
+                     value="{{ (start_date) if start_date else '' }}">
                 </div>
                 <div class="expert-row">
                     <label for="end_dt">End:</label>
                     <input type="datetime-local" id="end_dt" name="end_dt"
-                     value="{{ ((end_date or start_date) ~ 'T' ~ (end_time or '23:59')) if (end_date or start_date) else '' }}">
+                     value="{{ (end_date or start_date) if (end_date or start_date) else '' }}">
                 </div>
             </div>
 
@@ -110,29 +110,7 @@
 
             <button type="submit">Show</button>
         </form>
-    {% if user %}
-        {% for error in errors %}
-            <p class=error>{{ error }}</p>
-        {% endfor %}
-        {% for name, apps in changes.items() %}
-            {% set ns = namespace(changes=0, changesets=0) %}
-            {% for Change in apps.values() %}
-                {% set ns.changes = ns.changes + Change.changes %}
-                {% set ns.changesets = ns.changesets + Change.changesets %}
-            {% endfor %}
-            <ul>
-            <p><b><a href="https://www.openstreetmap.org/user/{{ name }}">{{ name }}</a></b>
-                 did <b>{{ ns.changes }} change{{ "s" if ns.changes > 1 else ""  }}</b>
-                 in {{ ns.changesets }} changeset{{ "s" if ns.changesets > 1 else ""  }}
-                 {{ date_str }}:</p>
-            {% for app, Change in apps.items() %}
-                <li>{{ Change.changes }} change{{ "s" if Change.changes > 1 else ""  }} in
-                    {{ Change.changesets }} changeset{{ "s" if Change.changesets > 1 else ""  }}
-                    with {{ app }}</li>
-            {% endfor %}
-            </ul>
-        {% endfor %}
-    {% else %}
+        {% block content %}
         <p>
             How much did you contribute to <a href="https://www.openstreetmap.org/">OpenStreetMap</a> today? Or any other day?
         </p>
@@ -167,47 +145,14 @@
                 </li>
             </ul>
         </div>
-    {% endif %}
-        {% if changeset_ids and changeset_ids|length > 0 %}
-        <div id="map" style="height: 300px; margin-top: 2em; border-radius: 12px; overflow: hidden;"></div>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-        <script>
-        const changesetIds = JSON.parse('{{ changeset_ids|tojson|safe }}');
-        if (changesetIds.length > 0) {
-            const bounds = [];
-            Promise.all(
-                changesetIds.map(id =>
-                    fetch(`https://api.openstreetmap.org/api/0.6/changeset/${id}`)
-                        .then(r => r.text())
-                        .then(xml => {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(xml, 'application/xml');
-                            const cs = doc.querySelector('changeset');
-                            if (cs) {
-                                bounds.push([
-                                    [parseFloat(cs.getAttribute('min_lat')), parseFloat(cs.getAttribute('min_lon'))],
-                                    [parseFloat(cs.getAttribute('max_lat')), parseFloat(cs.getAttribute('max_lon'))]
-                                ]);
-                            }
-                        })
-                )
-            ).then(() => {
-                if (bounds.length > 0) {
-                    const map = L.map('map').setView([0, 0], 2);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        maxZoom: 19,
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(map);
-                    const allBounds = L.latLngBounds(bounds.flat());
-                    map.fitBounds(allBounds);
-                    bounds.forEach(b => L.rectangle(b, {color: '#4f8cff', weight: 2}).addTo(map));
-                }
-            });
-        }
-        </script>
-        {% endif %}
-        <p class="footer">Powered by <a href="https://github.com/rompe/whatdidyoudo">whatdidyoudo {{ version }}</a></p>
+        {% endblock %}
+        {% endblock %}
+        <p class="footer">
+            {% for page in static_pages %}
+                <a href="/-/{{ page }}">{{ page }}</a>{% if not loop.last %} | {% endif %}
+            {% endfor %}
+             |
+             Powered by <a href="https://github.com/rompe/whatdidyoudo">whatdidyoudo {{ version }}</a></p>
     </div>
 </body>
 </html>

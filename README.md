@@ -53,7 +53,7 @@ pytest
 ### Run the app in test mode
 
 ```sh
-python whatdidyoudo/app.py
+python run.py
 ```
 
 Visit [http://127.0.0.1:5000/](http://127.0.0.1:5000/) in your browser to see "hello world".

@@ -1,0 +1,63 @@
+{% extends "index.html" %}
+{% block content %}
+        {% for error in errors %}
+            <p class=error>{{ error }}</p>
+        {% endfor %}
+        {% for name, apps in changes.items() %}
+            {% set ns = namespace(changes=0, changesets=0) %}
+            {% for Change in apps.values() %}
+                {% set ns.changes = ns.changes + Change.changes %}
+                {% set ns.changesets = ns.changesets + Change.changesets %}
+            {% endfor %}
+            <ul>
+            <p><b><a href="https://www.openstreetmap.org/user/{{ name }}">{{ name }}</a></b>
+                 did <b>{{ ns.changes }} change{{ "s" if ns.changes > 1 else ""  }}</b>
+                 in {{ ns.changesets }} changeset{{ "s" if ns.changesets > 1 else ""  }}
+                 {{ date_str }}:</p>
+            {% for app, Change in apps.items() %}
+                <li>{{ Change.changes }} change{{ "s" if Change.changes > 1 else ""  }} in
+                    {{ Change.changesets }} changeset{{ "s" if Change.changesets > 1 else ""  }}
+                    with {{ app }}</li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+        {% if changeset_ids and changeset_ids|length > 0 %}
+        <div id="map" style="height: 300px; margin-top: 2em; border-radius: 12px; overflow: hidden;"></div>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script>
+        const changesetIds = JSON.parse('{{ changeset_ids|tojson|safe }}');
+        if (changesetIds.length > 0) {
+            const bounds = [];
+            Promise.all(
+                changesetIds.map(id =>
+                    fetch(`https://api.openstreetmap.org/api/0.6/changeset/${id}`)
+                        .then(r => r.text())
+                        .then(xml => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(xml, 'application/xml');
+                            const cs = doc.querySelector('changeset');
+                            if (cs) {
+                                bounds.push([
+                                    [parseFloat(cs.getAttribute('min_lat')), parseFloat(cs.getAttribute('min_lon'))],
+                                    [parseFloat(cs.getAttribute('max_lat')), parseFloat(cs.getAttribute('max_lon'))]
+                                ]);
+                            }
+                        })
+                )
+            ).then(() => {
+                if (bounds.length > 0) {
+                    const map = L.map('map').setView([0, 0], 2);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    const allBounds = L.latLngBounds(bounds.flat());
+                    map.fitBounds(allBounds);
+                    bounds.forEach(b => L.rectangle(b, {color: '#4f8cff', weight: 2}).addTo(map));
+                }
+            });
+        }
+        </script>
+        {% endif %}
+{% endblock %}
