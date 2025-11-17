@@ -144,8 +144,9 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
                                            start_date=start_date or today,
                                            end_date=end_date)
                 # Only cache results when the range does not include today
-                if ((start_date and start_date != today) or
-                        (end_date and end_date != today)):
+                # because today's data may still change
+                if not (start_date.startswith(today) or
+                        end_date.startswith(today)):
                     cache.set(cache_key, cur_data)  # type: ignore
             except requests.HTTPError:
                 errors.append(
