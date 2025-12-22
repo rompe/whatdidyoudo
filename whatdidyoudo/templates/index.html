@@ -85,7 +85,7 @@
             <!-- Simple date (default) -->
             <div id="simpleDateRow">
                 <label for="single_date" class="hidden">Date:</label>
-                <input type="date" id="single_date" name="single_date" value="{{ start_date or '' }}">
+                <input type="date" id="single_date" name="single_date" value="{{ start_date.split('T')[0] or '' }}">
             </div>
 
             <!-- Expert controls (hidden by default) -->
