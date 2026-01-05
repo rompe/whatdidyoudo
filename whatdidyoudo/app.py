@@ -46,6 +46,8 @@ def get_etree_from_url(url: str, cache_result: bool = False) -> ET.Element:
         result = response.content
         if cache_result:
             cache.set(url, result)  # type: ignore
+        else:
+            logger.debug("Not caching result for URL: %s", url)
     return ET.fromstring(result)
 
 
@@ -66,7 +68,7 @@ def get_changesets(user: str, start_date: str, end_date: str,
                      f"display_name={user}&"
                      f"time={start_date}:00Z,"
                      f"{end_date}:00Z")
-    logger.warning("Fetching changesets from URL: %s", changeset_url)
+    logger.debug("Fetching changesets from URL: %s", changeset_url)
     # Don't cache result if today is included in the range
     cache_result = end_timestamp >= datetime.datetime.now()
     root = get_etree_from_url(url=changeset_url, cache_result=cache_result)
@@ -124,7 +126,7 @@ def get_changes(user: str, start_date: str,
 
         diff_url = ("https://api.openstreetmap.org/api/0.6/changeset/"
                     f"{cs_id}/download")
-        logger.warning("Fetching changeset diff from URL: %s", diff_url)
+        logger.debug("Fetching changeset diff from URL: %s", diff_url)
         try:
             root = get_etree_from_url(url=diff_url, cache_result=cache_result)
             for action in root:
@@ -211,8 +213,8 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
     if 'T' not in end_date:
         end_date += 'T23:59'
 
-    logger.warning("getting changes for %s between %s and %s",
-                   user, start_date, end_date)
+    logger.debug("getting changes for %s between %s and %s",
+                 user, start_date, end_date)
 
     changeset_ids: list[str] = []
     users = [item.strip() for item in (user or "").split(",") if item.strip()]
