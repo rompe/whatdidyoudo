@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Mapping
 import requests
 
-from flask import Flask, render_template
+from flask import Flask, g, render_template, request
 from flask_caching import Cache
 from flask_limiter import Limiter, RateLimitExceeded
 from flask_limiter.util import get_remote_address
@@ -32,6 +32,15 @@ class Changes:
     changesets: int = 0
 
 
+def debug(msg: str) -> None:
+    """Log a message and store it in the Flask g object."""
+    logger.debug(msg)
+    if not hasattr(g, "debug_messages"):
+        debug_messages: list[str] = []
+        g.debug_messages = debug_messages
+    g.debug_messages.append(msg)
+
+
 def get_static_pages() -> list[str]:
     """Return a list of available static pages."""
     return [entry.stem for entry in pathlib.Path(static_dir).glob('*.html')]
@@ -40,14 +49,17 @@ def get_static_pages() -> list[str]:
 def get_etree_from_url(url: str, cache_result: bool = False) -> ET.Element:
     """Fetches XML content from a URL and returns the root Element."""
     result = cache.get(url)  # type: ignore
-    if not result:
+    if result:
+        debug(f"Cache hit for URL: {url}")
+    else:
+        debug(f"Cache miss for URL: {url}")
         response = requests.get(url, timeout=120)
         response.raise_for_status()  # Raise an error for bad responses
         result = response.content
         if cache_result:
             cache.set(url, result)  # type: ignore
         else:
-            logger.debug("Not caching result for URL: %s", url)
+            debug(f"Not caching result for URL: {url}")
     return ET.fromstring(result)
 
 
@@ -68,7 +80,7 @@ def get_changesets(user: str, start_date: str, end_date: str,
                      f"display_name={user}&"
                      f"time={start_date}:00Z,"
                      f"{end_date}:00Z")
-    logger.debug("Fetching changesets from URL: %s", changeset_url)
+    debug(f"Fetching changesets from URL: {changeset_url}")
     # Don't cache result if today is included in the range
     cache_result = end_timestamp >= datetime.datetime.now()
     root = get_etree_from_url(url=changeset_url, cache_result=cache_result)
@@ -126,7 +138,8 @@ def get_changes(user: str, start_date: str,
 
         diff_url = ("https://api.openstreetmap.org/api/0.6/changeset/"
                     f"{cs_id}/download")
-        logger.debug("Fetching changeset diff from URL: %s", diff_url)
+        debug(msg=f"Fetching changeset diff from {diff_url} "
+              f"with{'out' if not cache_result else ''} caching")
         try:
             root = get_etree_from_url(url=diff_url, cache_result=cache_result)
             for action in root:
@@ -213,8 +226,7 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
     if 'T' not in end_date:
         end_date += 'T23:59'
 
-    logger.debug("getting changes for %s between %s and %s",
-                 user, start_date, end_date)
+    debug(f"getting changes for {user} between {start_date} and {end_date}")
 
     changeset_ids: list[str] = []
     users = [item.strip() for item in (user or "").split(",") if item.strip()]
@@ -226,9 +238,12 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
     except RateLimitExceeded as msg:
         errors.append(f"Rate limit exceeded while processing {user}: {msg}")
 
+    show_debug = request.args.get("debug") == "1"
     return render_template('result.html', user=user, start_date=start_date,
                            end_date=end_date, expert=expert,
                            changes=changes,
                            errors=errors, date_str=date_str,
                            version=__version__, changeset_ids=changeset_ids,
-                           static_pages=get_static_pages())
+                           static_pages=get_static_pages(),
+                           debug_messages=g.get("debug_messages", [])
+                           if show_debug else [])

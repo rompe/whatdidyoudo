@@ -60,4 +60,7 @@
         }
         </script>
         {% endif %}
+        {% if debug_messages and debug_messages|length > 0 %}
+        <pre>{{ debug_messages|join('\n') }}</pre>
+        {% endif %}
 {% endblock %}
