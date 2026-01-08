@@ -5,7 +5,7 @@ import pathlib
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Mapping, MutableMapping
 import requests
 
 from flask import Flask, g, render_template, request
@@ -159,7 +159,7 @@ def get_changes_for_all_users(
 
     start_date, end_date are ISO date strings (YYYY-MM-DDThh:mm).
     """
-    changes: defaultdict[str, defaultdict[str, Changes]] = \
+    changes: MutableMapping[str, Mapping[str, Changes]] = \
         defaultdict(lambda: defaultdict(Changes))
     changeset_ids: list[str] = []
     errors: list[str] = []
@@ -175,6 +175,21 @@ def get_changes_for_all_users(
             errors.append(f"Can't determine changes for user {name} between "
                           f"{start_date} and {end_date}.")
     return changes, changeset_ids, errors
+
+
+def get_team_result(changes: Mapping[str, Mapping[str, Changes]]) -> str:
+    """Return the combined result for all users."""
+    team_changes: int = 0
+    team_changesets: int = 0
+    users = sorted(changes)
+    # No need to check list length, done in calling function
+    user_string = ", ".join(users[:-1]) + " and " + users[-1]
+    for user_changes in changes.values():
+        for app_changes in user_changes.values():
+            team_changes += app_changes.changes
+            team_changesets += app_changes.changesets
+    return f"{user_string} did {team_changes} changes in " \
+           f"{team_changesets} changesets. Your're such a great team!"
 
 
 @app.route('/')
@@ -214,6 +229,7 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
     "end_date" defaults to "start_date" when not provided.
     """
     errors: list[str] = []
+    message = ''
     today = datetime.date.today().isoformat()
     date_str = (f"between {start_date} and {end_date}"
                 if end_date else f"on {start_date or today}")
@@ -235,13 +251,15 @@ def whatdidyoudo(user: str | None = None, start_date: str | None = None,
         with limiter.limit("10 per minute"):
             changes, changeset_ids, errors = get_changes_for_all_users(
                 users=users, start_date=start_date, end_date=end_date)
+        if len(users) > 1:
+            message = get_team_result(changes=changes)
     except RateLimitExceeded as msg:
         errors.append(f"Rate limit exceeded while processing {user}: {msg}")
 
     show_debug = request.args.get("debug") == "1"
     return render_template('result.html', user=user, start_date=start_date,
                            end_date=end_date, expert=expert,
-                           changes=changes,
+                           changes=changes, message=message,
                            errors=errors, date_str=date_str,
                            version=__version__, changeset_ids=changeset_ids,
                            static_pages=get_static_pages(),

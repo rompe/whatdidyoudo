@@ -80,7 +80,7 @@
         {% block fullcontent %}
         <form id="mainForm" method="get" action="" onsubmit="event.preventDefault(); submitForm();">
             <label for="user" class="hidden">User:</label>
-            <input type="text" id="user" name="user" value="{{ user or '' }}" placeholder="insert OSM username" required>
+            <input type="text" id="user" name="user" value="{{ user or '' }}" placeholder="insert OSM username(s)" required>
 
             <!-- Simple date (default) -->
             <div id="simpleDateRow">

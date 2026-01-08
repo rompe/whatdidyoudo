@@ -3,6 +3,7 @@
         {% for error in errors %}
             <p class=error>{{ error }}</p>
         {% endfor %}
+        {% if message %}<h4>{{ message }}</h4>{% endif %}
         {% for name, apps in changes.items() %}
             {% set ns = namespace(changes=0, changesets=0) %}
             {% for Change in apps.values() %}
