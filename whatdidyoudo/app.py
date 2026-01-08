@@ -35,10 +35,13 @@ class Changes:
 def debug(msg: str) -> None:
     """Log a message and store it in the Flask g object."""
     logger.debug(msg)
-    if not hasattr(g, "debug_messages"):
-        debug_messages: list[str] = []
-        g.debug_messages = debug_messages
-    g.debug_messages.append(msg)
+    try:
+        if not hasattr(g, "debug_messages"):
+            debug_messages: list[str] = []
+            g.debug_messages = debug_messages
+        g.debug_messages.append(msg)
+    except RuntimeError:
+        logger.debug("No Flask g object available.")
 
 
 def get_static_pages() -> list[str]:
