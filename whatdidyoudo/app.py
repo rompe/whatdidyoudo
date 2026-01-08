@@ -82,7 +82,7 @@ def get_changesets(user: str, start_date: str, end_date: str,
                      f"{end_date}:00Z")
     debug(f"Fetching changesets from URL: {changeset_url}")
     # Don't cache result if today is included in the range
-    cache_result = end_timestamp >= datetime.datetime.now()
+    cache_result = end_timestamp <= datetime.datetime.now()
     root = get_etree_from_url(url=changeset_url, cache_result=cache_result)
     changesets = root.findall("changeset")
     if len(changesets) >= max_changesets_osm:
