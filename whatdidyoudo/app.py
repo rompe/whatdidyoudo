@@ -56,7 +56,7 @@ def get_etree_from_url(url: str, cache_result: bool = False) -> ET.Element:
         debug(f"Cache hit for URL: {url}")
     else:
         debug(f"Cache miss for URL: {url}")
-        response = requests.get(url, timeout=120)
+        response = requests.get(url, timeout=120, headers={"User-Agent": f"whatdidyoudo/{__version__} (https://whatdidyoudo.rompe.org)"}))
         response.raise_for_status()  # Raise an error for bad responses
         result = response.content
         if cache_result:
