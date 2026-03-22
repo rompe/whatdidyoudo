@@ -39,10 +39,15 @@
                             const doc = parser.parseFromString(xml, 'application/xml');
                             const cs = doc.querySelector('changeset');
                             if (cs) {
-                                bounds.push([
-                                    [parseFloat(cs.getAttribute('min_lat')), parseFloat(cs.getAttribute('min_lon'))],
-                                    [parseFloat(cs.getAttribute('max_lat')), parseFloat(cs.getAttribute('max_lon'))]
-                                ]);
+                                const min_lat = parseFloat(cs.getAttribute('min_lat'));
+                                const min_lon = parseFloat(cs.getAttribute('min_lon'));
+                                const max_lat = parseFloat(cs.getAttribute('max_lat'));
+                                const max_lon = parseFloat(cs.getAttribute('max_lon'));
+                                if (!isNaN(min_lat) && !isNaN(min_lon) && !isNaN(max_lat) && !isNaN(max_lon)) {
+                                    bounds.push([[min_lat, min_lon], [max_lat, max_lon]]);
+                                } else {
+                                    console.warn(`Changeset ${id} has invalid bounding box data.`);
+                                }
                             }
                         })
                 )
